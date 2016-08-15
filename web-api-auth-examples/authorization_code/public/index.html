@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Example of the Authorization Code flow with Spotify</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <style type="text/css">
+      #login, #loggedin {
+        display: none;
+      }
+      .text-overflow {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 500px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div id="login">
+        <h1>This is an example of the Authorization Code flow</h1>
+        <a href="/login" class="btn btn-primary">Log in with Spotify</a>
+      </div>
+      <div id="loggedin">
+        <div id="user-profile">
+        </div>
+        <button class="btn btn-default" id="obtain-new-token">Obtain new token using the refresh token</button>
+      </div>
+    </div>
+    <div id="oauth">
+    </div>
+
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="./lib/spotify.js"></script>
+    <script>
+      (function() {
+
+        var v = 'hello';
+        /**
+         * Obtains parameters from the hash of the URL
+         * @return Object
+         */
+        function getHashParams() {
+          var hashParams = {};
+          var e, r = /([^&;=]+)=?([^&;]*)/g,
+              q = window.location.hash.substring(1);
+          while ( e = r.exec(q)) {
+             hashParams[e[1]] = decodeURIComponent(e[2]);
+          }
+          return hashParams;
+        }
+
+
+        var oauthPlaceholder = document.getElementById('oauth');
+
+        var params = getHashParams();
+
+        var access_token = params.access_token,
+            refresh_token = params.refresh_token,
+            error = params.error;
+
+        var ajaxCall = function(url,s){
+          var apiObject = $.ajax({
+            url: url,
+            headers: {
+                  'Authorization': 'Bearer ' + access_token
+                },
+            success: s
+          });
+          return apiObject;
+        }
+          
+        var pl = function(obj) {
+          var spotify = undefined;
+          var startSpotify = function(){
+                              Spotify.start('ad9e2f095acba3338ca65c43ddf4d2e3', 
+                                function(ok,instance,msg){
+                                    if(ok) {
+                                      spotify = instance;
+                                    }
+                                });
+                            };
+
+          var dom = $('#oauth');
+          var items = obj.playlists.items;
+          var stringHTML;
+          var mapArtist = function(tracks,index){
+                    var artist = tracks.track.artists[0].name;
+                    return artist || null;          
+                }
+
+          var mapTrack = function(tracks,index) {
+              var track = tracks.track.name;
+              return track || null;
+          }
+
+
+          var mapPreviewUrl = function (tracks, index) {
+              var previewUrl = tracks.track.preview_url ? tracks.track.preview_url: '';
+              return previewUrl || null;
+          }
+
+          var mapTrackUri = function(tracks, index) {
+              var trackUri = tracks.track.uri;
+              return trackUri || null;
+          }
+
+          var t = items.forEach(function(items){
+            var trackURL = ajaxCall(items.tracks.href)
+                              .done(function(data){                                 
+                                      var mappedArtist = data.items.map(mapArtist,this);
+                                      var mappedTrack = data.items.map(mapTrack,this);
+                                      var mappedPreviewUrl = data.items.map(mapPreviewUrl,this);
+                                      var mappedTrackUri = data.items.map(mapTrackUri,this);
+                                      v = "fg";
+                                      
+                                      
+                                      // stringHTML += "Artist: " + artist + "<br /> " +
+                                      //                  "Track: " + track + "<br />" +
+                                      //                  "Play: <a href='" + trackURI + "'>Play</a><br />" +
+                                      //                  "<a href='#' class='play' id='play" +index+ "' onClick='"+"'>Play</a>"
+                                      //                  +
+                                      //                  "Preview: <a href='" + previewURL + "'>Preview</a><br /><br />";
+                                      
+                                      // dom.append(stringHTML);
+                                     });
+          },this);
+        }
+
+
+        if (error) {
+          alert('There was an error during the authentication');
+        } else {
+          if (access_token) {
+
+
+           var playlists =  ajaxCall(
+                              'https://api.spotify.com/v1/browse/categories/chill/playlists/',
+                              function(data){                      
+                                pl(data);
+                              });
+
+            
+          } else {
+              // render initial screen
+              $('#login').show();
+              $('#loggedin').hide();
+          }
+
+          
+        }
+      console.log('now',v)})();
+    </script>
+  </body>
+</html>
+
