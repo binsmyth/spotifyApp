@@ -82,7 +82,8 @@
 
           var dom = $('#oauth');
           var items = obj.playlists.items;
-          var stringHTML;
+          var stringHTML="<button onClick='fetchLocalData()'>Click Here</button>";
+          dom.append(stringHTML);
           var mapArtist = function(tracks,index){
                     var artist = tracks.track.artists[0].name;
                     return artist || null;          
@@ -104,43 +105,17 @@
               return trackUri || null;
           }
 
-          var appendArtistToDOM = function(artist,track,trackuri,previewuri){
-            for(var i = 0 ; i< 1; i++){
-              if(artist[i].length === track[i].length && 
-                 track[i].length === trackuri[i].length &&
-                 trackuri[i].length === previewuri[i].length) {
-                    for(var j = 0 ; j<artist[i].length; j++){
-                      stringHTML += "Artist: " + artist[i][j] + "<br /> " +
-                                     "Track: " + track[i][j] + "<br />" +
-                                     "Play: <a href='" + trackuri[i][j] + "'>Play</a><br />" +
-                                     "Preview: <a href='" + previewuri[i][j] + "'>Preview</a><br /><br />";                      
-                    }                    
-              }              
-            }
-            dom.append(stringHTML);
-
-                                      
-            //dom.append(stringHTML);
-          }
-          var stringHTML = "";
-          var mappedArtist = new Array();
-          var mappedTrack = new Array();
-          var mappedPreviewUrl = new Array();
-          var mappedTrackUri = new Array();
-          var itemLength = items.length;
-          var count = 0;
-          var t = items.forEach(function(items, index){
+          var t = items.forEach(function(items){
             var trackURL = ajaxCall(items.tracks.href)
                               .done(function(data){                                 
-                                      mappedArtist[index] = data.items.map(mapArtist);
-                                      mappedTrack[index] = data.items.map(mapTrack,this);
-                                      mappedPreviewUrl[index] = data.items.map(mapPreviewUrl,this);
-                                      mappedTrackUri[index] = data.items.map(mapTrackUri,this);
-                                      if(count === itemLength-1) {
-                                        appendArtistToDOM(mappedArtist,mappedTrack,mappedPreviewUrl,mappedTrackUri);
-                                      }
-                                      count++;                              
-                                      //appendArtistToDOM(mappedArtist, mappedTrack, mappedPreviewUrl,mappedTrackUri);                                      
+                                      var mappedArtist = data.items.map(mapArtist,this);
+                                      var mappedTrack = data.items.map(mapTrack,this);
+                                      var mappedPreviewUrl = data.items.map(mapPreviewUrl,this);
+                                      var mappedTrackUri = data.items.map(mapTrackUri,this);
+                                      localStorage.setItem('artist',mappedArtist);
+                                      localStorage.setItem('track',mappedTrack);
+                                      localStorage.setItem('previewUrl',mappedPreviewUrl);
+                                      localStorage.setItem('trackUri',mappedTrackUri);                 
                                      });
           },this);
         }
@@ -166,9 +141,21 @@
           }
 
           
-        }
-      })();
+        }})();
+
     </script>
+    <script>
+     function fetchLocalData(){
+          var artist = localStorage.getItem('artist');
+          var track = localStorage.getItem('track');
+          var previewUrl = localStorage.getItem('previewUrl');
+          var trackUri = localStorage.getItem('trackUri');
+          if(artist && track && previewUrl && trackUri) {
+              
+          }            
+        }
+    </script>
+
   </body>
 </html>
 
