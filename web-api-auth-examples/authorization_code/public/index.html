@@ -80,42 +80,52 @@
                                 });
                             };
 
-          var dom = $('#oauth');
           var items = obj.playlists.items;
-          var stringHTML="<button onClick='fetchLocalData()'>Click Here</button>";
-          dom.append(stringHTML);
+          var itemslength = Object.keys(items).length;
           var mapArtist = function(tracks,index){
                     var artist = tracks.track.artists[0].name;
-                    return artist || null;          
+                    return artist || "N/A";          
                 }
 
           var mapTrack = function(tracks,index) {
               var track = tracks.track.name;
-              return track || null;
+              return track || "N/A";
           }
 
 
           var mapPreviewUrl = function (tracks, index) {
               var previewUrl = tracks.track.preview_url ? tracks.track.preview_url: '';
-              return previewUrl || null;
+              return previewUrl || "N/A";
           }
 
           var mapTrackUri = function(tracks, index) {
               var trackUri = tracks.track.uri;
-              return trackUri || null;
+              return trackUri || "N/A";
           }
 
-          var t = items.forEach(function(items){
+          var appendToStorage = function(name,data) {
+            var old = localStorage.getItem(name);
+            if(old === null) old = "";
+            localStorage.setItem(name, old+data);
+          }
+          var mappedArtist = [];
+          var mappedTrack = [];
+          var mappedPreviewUrl = [];
+          var mappedTrackUri = []; 
+          var t = items.forEach(function(items,index){
             var trackURL = ajaxCall(items.tracks.href)
                               .done(function(data){                                 
-                                      var mappedArtist = data.items.map(mapArtist,this);
-                                      var mappedTrack = data.items.map(mapTrack,this);
-                                      var mappedPreviewUrl = data.items.map(mapPreviewUrl,this);
-                                      var mappedTrackUri = data.items.map(mapTrackUri,this);
-                                      localStorage.setItem('artist',mappedArtist);
-                                      localStorage.setItem('track',mappedTrack);
-                                      localStorage.setItem('previewUrl',mappedPreviewUrl);
-                                      localStorage.setItem('trackUri',mappedTrackUri);                 
+                                      mappedArtist.push(data.items.map(mapArtist,this));
+                                      mappedTrack.push(data.items.map(mapTrack,this));
+                                      mappedPreviewUrl.push(data.items.map(mapPreviewUrl,this));
+                                      mappedTrackUri.push(data.items.map(mapTrackUri,this));
+
+                                      if (index === itemslength-1){            
+                                        appendToStorage('artist',JSON.stringify(mappedArtist));
+                                        appendToStorage('track',JSON.stringify(mappedTrack));
+                                        appendToStorage('previewUrl',JSON.stringify(mappedPreviewUrl));
+                                        appendToStorage('trackUri',JSON.stringify(mappedTrackUri)); 
+                                      }                                                       
                                      });
           },this);
         }
@@ -129,7 +139,8 @@
 
            var playlists =  ajaxCall(
                               'https://api.spotify.com/v1/browse/categories/chill/playlists/',
-                              function(data){                      
+                              function(data){
+                              localStorage.clear();                    
                                 pl(data);
                               });
 
@@ -142,20 +153,17 @@
 
           
         }})();
-
+      function fetchLocalData(){
+        var dom = $('#oauth');
+        var artist = localStorage.getItem('artist');
+        var track = localStorage.getItem('track');
+        var previewUrl = localStorage.getItem('previewUrl');
+        var trackUri = localStorage.getItem('trackUri');
+        if(artist && track && previewUrl && trackUri) {
+          
+        }            
+      }
     </script>
-    <script>
-     function fetchLocalData(){
-          var artist = localStorage.getItem('artist');
-          var track = localStorage.getItem('track');
-          var previewUrl = localStorage.getItem('previewUrl');
-          var trackUri = localStorage.getItem('trackUri');
-          if(artist && track && previewUrl && trackUri) {
-              
-          }            
-        }
-    </script>
-
+    <button onClick = "fetchLocalData();">Click Here</button>
   </body>
 </html>
-
