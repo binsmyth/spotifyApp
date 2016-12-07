@@ -11,6 +11,7 @@ var express = require('express'); // Express web server framework
 var request = require('request'); // "Request" library
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
+var spotify = require('./public/lib/spotify.js');
 
 var client_id = 'fb255c97e8894be4ad4a234e3a7ac7ec'; // Your client id
 var client_secret = 'a28baddadfe2498897f72169c092b7d7'; // Your secret
@@ -54,6 +55,7 @@ app.get('/login', function(req, res) {
       state: state
     }));
 });
+
 
 app.get('/callback', function(req, res) {
 
@@ -139,6 +141,16 @@ app.get('/refresh_token', function(req, res) {
       });
     }
   });
+});
+
+app.get('/play',function(req,res){
+  var id = req.param('id');
+  spotify.getTokens().then(() => {
+    return spotify.play(id);
+  }).then(console.log, console.error)
+  console.log('play');
+  res.redirect('/login');
+  res.send('hello');
 });
 
 console.log('Listening on 8888');

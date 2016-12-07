@@ -1,117 +1,138 @@
-(function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define(factory);
-    } else if (typeof exports === 'object') {
-        module.exports = factory;
-    } else {
-        root.Spotify = factory();
-    }
-}(this, function () {
-    "use strict";
-    return (function($){
-        var versionUrl = 'https://tpcaahshvs.spotilocal.com:4371/service/version.json?service=remote&ref=&cors=';
-        var oauthTokenUrl = 'http://open.spotify.com/token';
+var request = require('superagent');
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-        var urlTemplate = '';
-        urlTemplate += 'https://kcifscozyq.spotilocal.com:4371/remote/'
-        urlTemplate += '${action}.json';
-        urlTemplate += '?csrf=${csrf}&oauth=${oauth}';
-        urlTemplate += '${actionCtx}';
-        urlTemplate += '&ref=&cors=';
+let PORT = 4370;
+let DEFAULT_RETURN_ON = ['login', 'logout', 'play', 'pause', 'error', 'ap'];
+let ORIGIN_HEADER = {'Origin': 'https://open.spotify.com'};
 
-        var url = '';
-        var contexts = {
-            'status': '&returnon=login%2Clogout%2Cplay%2Cpause%2Cerror%2Cap&returnafter=${returnAfter}',
-            'play': '&uri=${uri}&context=${uri}',
-            'pause': '&pause=${pause}'
-        };
+class Spotilocal {
 
-        var readyH = $.Deferred();
+  constructor (oauthToken, csrfToken) {
+    this.hostName = this.generateHostname();
+  }
 
-        function Spotify(csrf) {            
-            if (typeof csrf === 'undefined'){
-                readyH.reject(false, undefined, 'Must defined csrf token');
-                return;//throw 'Must define csrf token';
-            }
-            getOAuthToken().then(function(data){
-                var tokens = {
-                    csrf: csrf,
-                    oauth: data['t']
-                }
-                url = template(urlTemplate, tokens);
-                this.status(1).then(function(d){
-                    if (d.hasOwnProperty('error')){
-                        readyH.reject(false, undefined, d.error.message);
-                        throw d.error.message;
-                    }
-                    readyH.resolve(true, this, d);
-                    console.log('resolved');
-                }.bind(this));
-            }.bind(this));
-        }
-        Spotify.start = function(token, cb){
-            console.log("here");
-            readyH = $.Deferred();
-            var instance = new Spotify(token);
-            return instance.ready().done(cb).fail(cb);
-        }
+  getTokens (oauthToken, csrfToken) {
+    return new Promise((resolve, reject) => {
+      if (oauthToken && csrfToken) {
+        this.oauthToken = oauthToken;
+        this.csrfToken = csrfToken;
+        return resolve();
+      }
 
-        $.extend(Spotify.prototype, {
-            status: function(returnAfter){
-                var req = createUrl('status', {
-                    returnAfter: returnAfter
-                });
-                return $.get(req);
-            },
-            play: function(uri){
-                var req = createUrl('play', {
-                    uri: encodeURIComponent(uri)
-                });
-                return $.get(req);
-            },
-            togglePause: function(){
-                var state = this.status(1),
-                    resp = state.then(function(currentStatus){
-                        var req = createUrl('pause', {
-                            pause: currentStatus.playing
-                        });
-                        return $.get(req)
-                    });
-                return resp;
-            },
-            version: function(){
-                return $.get(versionUrl);
-            },
-            ready: function(){
-                return readyH.promise();
-            }
+      // get tokens
+      Promise.all([
+        this.getCsrfToken(),
+        this.getOauthToken()]
+      ).then(resolve, reject);
+    });
+  }
+
+  getJson (url, params = {}, headers = {}) {
+    return new Promise((resolve, reject) => {
+      request
+        .get(url)
+        .query(params)
+        .set(headers)
+        .end((err, res) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(res.body);
         });
-        var getOAuthToken = function(){
-            return $.ajax({
-                url: "https://jsonp.afeld.me/?url=https%3A%2F%2Fopen.spotify.com%2Ftoken",
-                dataType: "jsonp"
-            });
-        };
+    });
+  }
 
-        var createUrl = function(action, ctx){
-            var ctxTmpl = contexts[action];
-            var ctxUrl = template(ctxTmpl, ctx);
+  generateHostname () {
+    let letters = 'abcdefghijklmnopqrstuvwxyz';
+    let subdomain = '';
+    for (let i = 0; i < 10; i++) {
+      subdomain += letters[Math.floor(Math.random()*letters.length)];
+    }
+    return subdomain + '.spotilocal.com';
+  }
 
-            return template(url, {
-                'action': action,
-                'actionCtx': ctxUrl
-            });
-        };
-        var template = function(template, data) {
-            return template.trim().replace(/\$\{(\d+|[a-z\d]+)\}/gi, function(match, backref) {
-                if (typeof data[backref] === 'undefined'){
-                    return '${'+backref+'}';
-                }
-                return data[backref];
-            });
-        };
+  getUrl (url = '') {
+    return 'https://'+ this.hostName + ':' + PORT + url;
+  }
 
-        return Spotify;
+  getVersion () {
+    return this.getJson(
+      this.getUrl('/service/version.json'),
+      {'service': 'remote'},
+      ORIGIN_HEADER
+    );
+  }
 
-    })(jQuery);
-}));
+  getOauthToken () {
+    return new Promise((resolve, reject) => {
+      this.getJson('https://open.spotify.com/token')
+        .then(data => {
+          this.oauthToken = data['t'];
+          resolve(data['t']);
+        })
+        .catch(err => {
+          reject(err);
+        });
+    });
+  }
+
+  getCsrfToken () {
+    return new Promise((resolve, reject) => {
+      this.getJson(this.getUrl('/simplecsrf/token.json'), null, ORIGIN_HEADER)
+        .then(data => {
+          this.csrfToken = data['token'];
+          resolve(data['token']);
+        })
+        .catch(err => {
+          reject(err);
+        });
+    });
+  }
+
+  getStatus (returnAfter = 59, returnOn = DEFAULT_RETURN_ON) {
+    let params = {
+      'oauth': this.oauthToken,
+      'csrf': this.csrfToken,
+      'returnafter': returnAfter,
+      'returnon': returnOn.join(',')
+    };
+    return this.getJson(this.getUrl('/remote/status.json'), params, ORIGIN_HEADER);
+  }
+
+  pause (pause) {
+    if (typeof pause === 'undefined') {
+      pause = true;
+    } else {
+      pause = !pause ? false : true;
+    }
+
+    let params = {
+      'oauth': this.oauthToken,
+      'csrf': this.csrfToken,
+      'pause': pause,
+    };
+    return this.getJson(this.getUrl('/remote/pause.json'), params, ORIGIN_HEADER);
+  }
+
+  unpause (pause) {
+    return this.pause(false);
+  }
+
+  openSpotifyClient () {
+    return this.getJson(this.getUrl('/remote/open.json'), null, ORIGIN_HEADER);
+  }
+
+  play (spotifyUri) {
+    let params = {
+      'oauth': this.oauthToken,
+      'csrf': this.csrfToken,
+      'uri': spotifyUri,
+      'context': spotifyUri,
+    };
+    return this.getJson(this.getUrl('/remote/play.json'), params, ORIGIN_HEADER);
+  }
+}
+
+let spotify = new Spotilocal();
+module.exports = spotify;

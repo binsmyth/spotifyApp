@@ -32,7 +32,6 @@
     </div>
 
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-    <script src="./lib/spotify.js"></script>
     <script>
       (function() {
         /**
@@ -69,17 +68,7 @@
           return apiObject;
         }
           
-        var pl = function(obj) {
-          var spotify = undefined;
-          var startSpotify = function(){
-                              Spotify.start('ad9e2f095acba3338ca65c43ddf4d2e3', 
-                                function(ok,instance,msg){
-                                    if(ok) {
-                                      spotify = instance;
-                                    }
-                                });
-                            };
-
+        var pl = function(obj) {    
           var items = obj.playlists.items;
           var itemslength = Object.keys(items).length;
           var mapArtist = function(tracks,index){
@@ -111,22 +100,24 @@
           var mappedArtist = [];
           var mappedTrack = [];
           var mappedPreviewUrl = [];
-          var mappedTrackUri = []; 
-          var t = items.forEach(function(items,index){
+          var mappedTrackUri = [];
+          var mappedPlaylistImage = [];
+          var t = items.forEach(function(items,index){            
             var trackURL = ajaxCall(items.tracks.href)
-                              .done(function(data){                                 
+                              .success(function(data){//playlist image and track list don't match
+                                      mappedPlaylistImage.push(items.images[0].url);
                                       mappedArtist.push(data.items.map(mapArtist,this));
                                       mappedTrack.push(data.items.map(mapTrack,this));
                                       mappedPreviewUrl.push(data.items.map(mapPreviewUrl,this));
                                       mappedTrackUri.push(data.items.map(mapTrackUri,this));
-
-                                      if (index === itemslength-1){            
+                                      if(index === itemslength-1){
                                         appendToStorage('artist',JSON.stringify(mappedArtist));
                                         appendToStorage('track',JSON.stringify(mappedTrack));
                                         appendToStorage('previewUrl',JSON.stringify(mappedPreviewUrl));
-                                        appendToStorage('trackUri',JSON.stringify(mappedTrackUri)); 
-                                      }                                                       
-                                     });
+                                        appendToStorage('trackUri',JSON.stringify(mappedTrackUri));
+                                        appendToStorage('playlistImage',JSON.stringify(mappedPlaylistImage));
+                                      }                                                                  
+                                     })
           },this);
         }
 
@@ -155,15 +146,25 @@
         }})();
       function fetchLocalData(){
         var dom = $('#oauth');
-        var artist = localStorage.getItem('artist');
-        var track = localStorage.getItem('track');
-        var previewUrl = localStorage.getItem('previewUrl');
-        var trackUri = localStorage.getItem('trackUri');
+        var artist = JSON.parse(localStorage.getItem('artist'));
+        var track = JSON.parse(localStorage.getItem('track'));
+        var previewUrl = JSON.parse(localStorage.getItem('previewUrl'));
+        var trackUri = JSON.parse(localStorage.getItem('trackUri'));
+        var playlistImage = JSON.parse(localStorage.getItem('playlistImage'));
         if(artist && track && previewUrl && trackUri) {
-          
-        }            
+          //console.log(artist);
+          if(artist.length === track.length && track.length === previewUrl.length && previewUrl.length === trackUri.length) {
+            for (var i = 0 ; i<artist.length;i++){
+              dom.append("<img src='" + playlistImage[i]+ "' /><br />");
+              for(var j=0;j<artist[i].length;j++) {
+                dom.append("<a href='/play?id=" + trackUri[i][j] + "'>" + j + ") "+ artist[i][j] + " -- " + track[i][j] + "</a><br />");
+              }
+            }
+          }
+         }            
       }
     </script>
     <button onClick = "fetchLocalData();">Click Here</button>
+    <a href="/play?id=10">Play</a>
   </body>
 </html>
