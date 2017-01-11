@@ -6,18 +6,32 @@ class AwesomeComponent extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			clicked:false
+			clicked:false,
+			imageid:null,
+			once:0,
+			lgShow: false
 		}
 	}
 	
 
-	onClick(){
+	onClick(imageid){
 		if(this.state.clicked === false){
-			this.setState({clicked:true})
+			this.setState({
+				clicked:true,
+				imageid: imageid,
+				lgShow: true
+			})
 		}
 		else
 		{
 			this.setState({clicked:false})
+		}
+	}
+
+	renderPlaylistContent(artist,i){
+		let lgClose = () => this.setState({lgShow: false});
+		if(i<1){
+			return <PlaylistContentComponent artist = {artist} show = {this.state.lgShow} onHide = {lgClose}/>
 		}
 	}
 
@@ -29,11 +43,13 @@ class AwesomeComponent extends React.Component {
 							return (
 								<span key={i}>
 									<PlaylistImagesComponent												
-												onSomeEvent={this.onClick.bind(this)} 
+												onSomeEvent={this.onClick.bind(this,i)} 
 												imgsrc={this.props.playlistImage[i]}
-											/>//Change the below part and put it in child component 
-											//to make it simpler and put a id prop on PlaylistImagescomponent
-									<PlaylistContentComponent artist = {this.props.artist[i]}/>
+											/>
+									
+											
+											{this.state.clicked ? this.renderPlaylistContent(this.props.artist[this.state.imageid],i) :null}
+									
 								</span>
 							)
 						},this)}

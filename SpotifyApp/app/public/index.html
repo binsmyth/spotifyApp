@@ -1,8 +1,14 @@
 <!doctype html>
 <html>
   <head>
-    <title>Example of the Authorization Code flow with Spotify</title>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <title>Spotify Playlist App</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="./lib/styles.css">
+
     <style type="text/css">
       #login, #loggedin {
         display: none;
@@ -155,18 +161,19 @@
         var playlistImage = JSON.parse(localStorage.getItem('playlistImage'));
         if(artist && track && previewUrl && trackUri) {
           //console.log(artist);
-          if(artist.length === track.length && track.length === previewUrl.length && previewUrl.length === trackUri.length) {
-            for (var i = 0 ; i<artist.length;i++){
-              dom.append("<img src='" + playlistImage[i]+ "' /><br />");
-              for(var j=0;j<artist[i].length;j++) {
-                dom.append("<a href='/play?id=" + trackUri[i][j] + "'>" + j + ") "+ artist[i][j] + " -- " + track[i][j] + "</a><br />");
-              }
-            }
-          }
+          // if(artist.length === track.length && track.length === previewUrl.length && previewUrl.length === trackUri.length) {
+          //   for (var i = 0 ; i<artist.length;i++){
+          //     dom.append("<img src='" + playlistImage[i]+ "' /><br />");
+          //     for(var j=0;j<artist[i].length;j++) {
+          //       dom.append("<a href='/play?id=" + trackUri[i][j] + "'>" + j + ") "+ artist[i][j] + " -- " + track[i][j] + "</a><br />");
+          //     }
+          //   }
+          // }
          }            
       }
     </script>
     <button onClick = "fetchLocalData();">View Playlists</button>
     <script src="react/bundle.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   </body>
 </html>

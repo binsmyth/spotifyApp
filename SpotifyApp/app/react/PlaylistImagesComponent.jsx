@@ -8,7 +8,7 @@ class PlaylistImagesComponent extends React.Component {
 	render() {
 			return (
 				<span>
-					<img onClick={this.props.onSomeEvent.bind(this)} src={this.props.imgsrc}/>
+					<img onClick={this.props.onSomeEvent.bind(this)} src={this.props.imgsrc} />
 				</span>
 				);			
 	}
