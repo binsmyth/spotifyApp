@@ -36,23 +36,24 @@ class AwesomeComponent extends React.Component {
 	}
 
 	render() {
+		console.log(this.props);
 		if(this.props.playlistImage){
 			return (
 				<div>
-						{this.props.playlistImage.map(function(playlistImage,i){
-							return (
-								<span key={i}>
-									<PlaylistImagesComponent												
-												onSomeEvent={this.onClick.bind(this,i)} 
-												imgsrc={this.props.playlistImage[i]}
-											/>
-									
-											
-											{this.state.clicked ? this.renderPlaylistContent(this.props.artist[this.state.imageid],i) :null}
-									
-								</span>
-							)
-						},this)}
+				 {this.props.playlistImage.map(function(playlistImage,i){
+					return (
+					 <span key={i}>
+					  <PlaylistImagesComponent												
+						onSomeEvent={this.onClick.bind(this,i)} 
+						imgsrc={this.props.playlistImage[i]}
+					    />
+					
+							
+					    {this.state.clicked ? this.renderPlaylistContent(this.props.artist[this.state.imageid],i) :null}
+					
+					 </span>
+					)
+					 },this)}
 				</div>
 				);	
 		}

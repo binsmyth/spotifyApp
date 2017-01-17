@@ -21601,6 +21601,7 @@
 		}, {
 			key: 'render',
 			value: function render() {
+				console.log(this.props);
 				if (this.props.playlistImage) {
 					return _react2.default.createElement(
 						'div',
@@ -21743,7 +21744,7 @@
 					{ show: this.props.show, bsSize: 'large', 'aria-labelledby': 'contained-modal-title-lg' },
 					_react2.default.createElement(
 						_Modal2.default.Header,
-						{ closeButton: true },
+						null,
 						_react2.default.createElement(
 							_Modal2.default.Title,
 							{ id: 'contained-modal-title-lg' },
@@ -21753,7 +21754,17 @@
 					_react2.default.createElement(
 						_Modal2.default.Body,
 						null,
-						this.props.artist
+						this.props.artist.map(function (element, i) {
+							return _react2.default.createElement(
+								'div',
+								{ key: i },
+								_react2.default.createElement(
+									'a',
+									{ href: '/play' },
+									element
+								)
+							);
+						})
 					),
 					_react2.default.createElement(
 						_Modal2.default.Footer,

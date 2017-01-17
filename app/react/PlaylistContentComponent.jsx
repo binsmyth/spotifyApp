@@ -19,11 +19,11 @@ class PlaylistContentComponent extends React.Component {
 	render() {
 			return 	(
 				<Modal show = {this.props.show} bsSize="large" aria-labelledby="contained-modal-title-lg">
-		        <Modal.Header closeButton>
+		        <Modal.Header>
 		          <Modal.Title id="contained-modal-title-lg">Modal heading</Modal.Title>
 		        </Modal.Header>
 		        <Modal.Body>
-		          {this.props.artist}
+		          {this.props.artist.map((element,i)=><div key = {i}><a href="/play">{element}</a></div>)}
 		        </Modal.Body>
 		        <Modal.Footer>
 		          <Button onClick={this.clickHandle.bind(this)}>Close</Button>

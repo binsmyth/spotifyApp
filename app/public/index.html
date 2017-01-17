@@ -36,7 +36,13 @@
     </div>
     <div id="oauth">
     </div>
-    <div id="app">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12 col-sm-6 col-xs-12" id="app">
+        
+        </div>
+      </div>
+      
     </div>
 
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
@@ -152,27 +158,7 @@
 
           
         }})();
-      function fetchLocalData(){
-        var dom = $('#oauth');
-        var artist = JSON.parse(localStorage.getItem('artist'));
-        var track = JSON.parse(localStorage.getItem('track'));
-        var previewUrl = JSON.parse(localStorage.getItem('previewUrl'));
-        var trackUri = JSON.parse(localStorage.getItem('trackUri'));
-        var playlistImage = JSON.parse(localStorage.getItem('playlistImage'));
-        if(artist && track && previewUrl && trackUri) {
-          //console.log(artist);
-          // if(artist.length === track.length && track.length === previewUrl.length && previewUrl.length === trackUri.length) {
-          //   for (var i = 0 ; i<artist.length;i++){
-          //     dom.append("<img src='" + playlistImage[i]+ "' /><br />");
-          //     for(var j=0;j<artist[i].length;j++) {
-          //       dom.append("<a href='/play?id=" + trackUri[i][j] + "'>" + j + ") "+ artist[i][j] + " -- " + track[i][j] + "</a><br />");
-          //     }
-          //   }
-          // }
-         }            
-      }
     </script>
-    <button onClick = "fetchLocalData();">View Playlists</button>
     <script src="react/bundle.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   </body>
