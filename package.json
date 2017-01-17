@@ -1,10 +1,10 @@
 {
   "author": "Spotify",
-  "name": "web-api-auth-examples",
+  "name": "App",
   "description": "Basic examples of the Spotify authorization flows through OAuth 2",
   "version": "0.0.1",
   "scripts": {
-    "start": "node ./app/app.js"
+    "start": "node index.js"
     },
   "dependencies": {
     "babel-loader": "^6.2.8",
