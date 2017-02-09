@@ -1,9 +1,10 @@
 import React from 'react';
 import PlaylistImagesComponent from './PlaylistImagesComponent.jsx';
 import PlaylistContentComponent from './PlaylistContentComponent.jsx';
+import SearchBar from './SearchBar.jsx';
 
-class AwesomeComponent extends React.Component {
-	constructor(props) {
+class AwesomeComponent extends React.Component{
+	constructor(props){
 		super(props);
 		this.state = {
 			clicked:false,
@@ -28,18 +29,19 @@ class AwesomeComponent extends React.Component {
 		}
 	}
 
-	renderPlaylistContent(artist,i){
+	renderPlaylistContent(artist,track,trackUri,previewUrl,i){
 		let lgClose = () => this.setState({lgShow: false});
+
 		if(i<1){
-			return <PlaylistContentComponent artist = {artist} show = {this.state.lgShow} onHide = {lgClose}/>
+			return <PlaylistContentComponent artist = {artist} previewUrl = {previewUrl} track={track} trackUri={trackUri} show = {this.state.lgShow} hd = {lgClose}/>
 		}
 	}
 
 	render() {
-		console.log(this.props);
 		if(this.props.playlistImage){
 			return (
 				<div>
+				<SearchBar />
 				 {this.props.playlistImage.map(function(playlistImage,i){
 					return (
 					 <span key={i}>
@@ -49,7 +51,13 @@ class AwesomeComponent extends React.Component {
 					    />
 					
 							
-					    {this.state.clicked ? this.renderPlaylistContent(this.props.artist[this.state.imageid],i) :null}
+					    {this.state.clicked ? this.renderPlaylistContent(
+					    						this.props.artist[this.state.imageid],
+					    						this.props.track[this.state.imageid],
+					    						this.props.trackUri[this.state.imageid],
+					    						this.props.previewUrl[this.state.imageid],
+					    						i
+					    						) :null}
 					
 					 </span>
 					)

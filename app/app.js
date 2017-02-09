@@ -91,7 +91,6 @@ app.get('/callback', function(req, res) {
 
         var access_token = body.access_token,
             refresh_token = body.refresh_token;
-
         var options = {
           url: 'https://api.spotify.com/v1/me',
           headers: { 'Authorization': 'Bearer ' + access_token },
@@ -143,14 +142,20 @@ app.get('/refresh_token', function(req, res) {
   });
 });
 
+app.get('/search',function(req,res){
+    var query = req.param('query');
+    
+    request.get({url:'https://api.spotify.com/v1/search?q= '+ query + ' +&type=playlist,artist'},
+                function(error,response,body){
+                  res.send(body);
+                });
+  })
+
 app.get('/play',function(req,res){
   var id = req.param('id');
   spotify.getTokens().then(() => {
     return spotify.play(id);
   }).then(console.log, console.error)
-  console.log('play');
-  res.redirect('/login');
-  res.send('hello');
 });
 
 console.log('Listening on 8888');

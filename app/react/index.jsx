@@ -2,6 +2,7 @@ import React from 'react';
 import {render} from 'react-dom';
 import AwesomeComponent from './AwesomeComponent.jsx';
 
+
 class App extends React.Component {
 	constructor(props){
 		super(props);
@@ -33,7 +34,7 @@ class App extends React.Component {
 		var target = this;
 		return (
 			<div>
-			 <AwesomeComponent playlistImage = {this.state.playlistImage} artist={this.state.artist}/>			
+			 <AwesomeComponent playlistImage = {this.state.playlistImage} artist={this.state.artist} track={this.state.track} trackUri={this.state.trackUri} previewUrl={this.state.previewUrl}/>
 			</div>
 			)
 	}
