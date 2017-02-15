@@ -13,9 +13,14 @@ class SearchBar extends React.Component{
 	}	
 
 	handleSubmit(e){
-		$.get("/search?query=" + this.state.query, function(data){
-				console.log(data);
-		})
+		fetch("/search?query=" + this.state.query)
+			.then(function(searchPromise){
+				searchPromise.json()
+					.then(function(searchObject){
+						console.log(searchObject.artists);
+				});
+			})
+
 		e.preventDefault();
 	}
 

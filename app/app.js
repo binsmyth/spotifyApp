@@ -9,6 +9,7 @@
 
 var express = require('express'); // Express web server framework
 var request = require('request'); // "Request" library
+var requestpromise = require('request-promise');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 var spotify = require('./public/lib/spotify.js');
@@ -145,10 +146,14 @@ app.get('/refresh_token', function(req, res) {
 app.get('/search',function(req,res){
     var query = req.param('query');
     
-    request.get({url:'https://api.spotify.com/v1/search?q= '+ query + ' +&type=playlist,artist'},
-                function(error,response,body){
-                  res.send(body);
-                });
+    requestpromise({url:'https://api.spotify.com/v1/search?q= '+ query + ' +&type=playlist,artist',
+        json:true})
+      .then(function(data){
+        res.send(data)
+      })
+      .catch(function(err){
+        console.log(err);
+      })
   })
 
 app.get('/play',function(req,res){
@@ -158,5 +163,49 @@ app.get('/play',function(req,res){
   }).then(console.log, console.error)
 });
 
+app.get('/call', function(req,res){
+  console.log("now");
+  var token = req.param('token');
+  var option = {
+    url:'https://api.spotify.com/v1/browse/categories/chill/playlists/',
+    headers:{
+          'Authorization': 'Bearer ' + token
+        }
+  };
+
+  function getPlaylistData(href){
+    href.forEach(function(href,index){
+      var option = {
+        url:href,
+        headers:{
+          'Authorization': 'Bearer ' + token
+        }
+      };
+
+      requestpromise(option)
+        .then(function(playlistdata){
+          playlistdata = JSON.parse(playlistdata);
+          console.log(playlistdata.tracks);
+        })
+        .catch(function(err){
+          console.log(err);
+        })
+    })
+  }
+
+
+  requestpromise(option)
+    .then(function(data){
+      var playlistdata = JSON.parse(data);
+      var playlisthref = [];
+      playlistdata.playlists.items.forEach(function(items,index){
+        playlisthref.push(items.href);
+      });
+      getPlaylistData(playlisthref);
+    })
+    .catch(function(err){
+      console.log(err);
+    })
+})
 console.log('Listening on 8888');
 app.listen(8888);
