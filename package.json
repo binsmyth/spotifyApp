@@ -3,10 +3,10 @@
   "name": "App",
   "description": "Basic examples of the Spotify authorization flows through OAuth 2",
   "version": "0.0.1",
-  "engines":{
-    "node" : "6.0.0"
-    },
-    "main": "index.js",
+  "engines": {
+    "node": "6.0.0"
+  },
+  "main": "index.js",
   "scripts": {
     "start": "node ./app/app.js"
   },
@@ -24,6 +24,7 @@
     "react-responsive-audio-player": "^1.1.2",
     "request": "~2.34.0",
     "request-promise": "^4.1.1",
+    "superagent": "^3.4.3",
     "webpack": "^1.14.0"
   },
   "devDependencies": {
