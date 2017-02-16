@@ -16,7 +16,7 @@ var spotify = require('./public/lib/spotify.js');
 
 var client_id = 'fb255c97e8894be4ad4a234e3a7ac7ec'; // Your client id
 var client_secret = 'a28baddadfe2498897f72169c092b7d7'; // Your secret
-var redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri
+var redirect_uri = 'https://spotifyreact.herokuapp.com/callback'; // Your redirect uri
 
 /**
  * Generates a random string containing numbers and letters
