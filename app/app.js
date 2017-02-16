@@ -173,7 +173,25 @@ app.get('/call', function(req,res){
         }
   };
 
-  function getPlaylistData(href){
+  requestpromise(option)
+    .then(function(data){
+      var playlistdata = JSON.parse(data);
+      var playlisthref = [];
+      var playlistimageurl = [];
+      playlistdata.playlists.items.forEach(function(items,index){
+        playlisthref.push(items.href);
+        items.images.forEach(function(imgurl,index){
+          playlistimageurl.push(imgurl.url);
+        })
+      });
+      getPlaylistData(playlisthref,playlistimageurl);
+    })
+    .catch(function(err){
+      console.log(err);
+    });
+
+  function getPlaylistData(href,imgurl){
+    var urllength = href.length;
     href.forEach(function(href,index){
       var option = {
         url:href,
@@ -181,31 +199,19 @@ app.get('/call', function(req,res){
           'Authorization': 'Bearer ' + token
         }
       };
-
+      console.log("image url = ", imgurl[0]);
+      
       requestpromise(option)
-        .then(function(playlistdata){
-          playlistdata = JSON.parse(playlistdata);
-          console.log(playlistdata.tracks);
-        })
-        .catch(function(err){
-          console.log(err);
-        })
+      .then(function(playlistdata){
+        playlistdata = JSON.parse(playlistdata);
+        var playlisttracksobject = playlistdata.tracks;
+        console.log(playlisttracksobject.items[0]);
+      })
+      .catch(function(err){
+        console.log(err);
+      })
     })
   }
-
-
-  requestpromise(option)
-    .then(function(data){
-      var playlistdata = JSON.parse(data);
-      var playlisthref = [];
-      playlistdata.playlists.items.forEach(function(items,index){
-        playlisthref.push(items.href);
-      });
-      getPlaylistData(playlisthref);
-    })
-    .catch(function(err){
-      console.log(err);
-    })
 })
 console.log('Listening on 8888');
 app.listen(8888);
