@@ -70,10 +70,13 @@
             refresh_token = params.refresh_token,
             error = params.error;
 
-        // fetch("/call?token="+ access_token)
-        //   .then(function(response){
-        //     console.log(response);
-        //   })
+        fetch("/call?token="+ access_token)
+          .then(function(response){
+            response.json()
+              .then(function(tracks){
+                console.log(tracks);
+              })
+          })
 
         var ajaxCall = function(url,s){
           var apiObject = $.ajax({

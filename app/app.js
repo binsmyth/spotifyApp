@@ -16,7 +16,7 @@ var spotify = require('./public/lib/spotify.js');
 
 var client_id = 'fb255c97e8894be4ad4a234e3a7ac7ec'; // Your client id
 var client_secret = 'a28baddadfe2498897f72169c092b7d7'; // Your secret
-var redirect_uri = 'https://spotifyreact.herokuapp.com/callback'; // Your redirect uri
+var redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri
 
 /**
  * Generates a random string containing numbers and letters
@@ -164,7 +164,6 @@ app.get('/play',function(req,res){
 });
 
 app.get('/call', function(req,res){
-  console.log("now");
   var token = req.param('token');
   var option = {
     url:'https://api.spotify.com/v1/browse/categories/chill/playlists/',
@@ -199,13 +198,13 @@ app.get('/call', function(req,res){
           'Authorization': 'Bearer ' + token
         }
       };
-      console.log("image url = ", imgurl[0]);
       
       requestpromise(option)
       .then(function(playlistdata){
         playlistdata = JSON.parse(playlistdata);
         var playlisttracksobject = playlistdata.tracks;
-        console.log(playlisttracksobject.items[0]);
+        console.log("sending to browser");
+        res.send(playlisttracksobject);
       })
       .catch(function(err){
         console.log(err);
@@ -214,4 +213,4 @@ app.get('/call', function(req,res){
   }
 })
 console.log('Listening');
-app.listen(process.env.PORT);
+app.listen(process.env.PORT||8888);
