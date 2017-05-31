@@ -17,7 +17,7 @@ class SearchBar extends React.Component{
 			.then(function(searchPromise){
 				searchPromise.json()
 					.then(function(searchObject){
-						console.log(searchObject.artists);
+						console.log(searchObject.playlists.items.map((a)=>a.name))
 				});
 			})
 

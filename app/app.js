@@ -14,6 +14,7 @@ var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 var spotify = require('./public/lib/spotify.js');
 
+
 var client_id = 'fb255c97e8894be4ad4a234e3a7ac7ec'; // Your client id
 var client_secret = 'a28baddadfe2498897f72169c092b7d7'; // Your secret
 var redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri
@@ -36,6 +37,31 @@ var generateRandomString = function(length) {
 var stateKey = 'spotify_auth_state';
 
 var app = express();
+
+//Webpack Server Stuffs
+// var webpackDevMiddleware = require("webpack-dev-middleware");
+// var webpackHotMiddleware = require("webpack-hot-middleware");
+// var webpack = require("webpack");
+// var config = require("../webpack.config");
+// var compiler = webpack(config);
+
+// app.use(webpackDevMiddleware(compiler, {
+//   hot: true,
+//   filename: 'bundle.js',
+//   publicPath: '/assets/',
+//   stats: {
+//     colors: true,
+//   },
+//   historyApiFallback: true,
+// }));
+ 
+// app.use(webpackHotMiddleware(compiler, {
+//   log: console.log,
+//   path: '/__webpack_hmr',
+//   heartbeat: 10 * 1000,
+// }));
+
+//Real app stuff
 
 app.use(express.static(__dirname + '/public'))
    .use(cookieParser());
@@ -146,7 +172,7 @@ app.get('/refresh_token', function(req, res) {
 app.get('/search',function(req,res){
     var query = req.param('query');
     
-    requestpromise({url:'https://api.spotify.com/v1/search?q= '+ query + ' +&type=playlist,artist',
+    requestpromise({url:'https://api.spotify.com/v1/search?q= '+ query + ' +&type=playlist',
         json:true})
       .then(function(data){
         res.send(data)

@@ -5,7 +5,9 @@ var BUILD_DIR = path.resolve(__dirname, 'app/public/react');
 var APP_DIR = path.resolve(__dirname, 'app/react');
 
 var config = {
-	entry: APP_DIR + '/index.jsx',
+	entry: [
+		APP_DIR + '/index.jsx'
+	] ,
 	output: {
 		path: BUILD_DIR,
 		filename: 'bundle.js'
@@ -15,7 +17,7 @@ var config = {
 		{
 			test: /\.jsx?/,
 			include: APP_DIR,
-			loader: 'babel'
+			loader: 'babel-loader'
 		}
 		]
 	}
