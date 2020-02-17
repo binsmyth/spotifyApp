@@ -66,16 +66,17 @@
 
         var params = getHashParams();
 
+
         var access_token = params.access_token,
             refresh_token = params.refresh_token,
             error = params.error;
 
-        fetch("/call?token="+ access_token)
+
+        fetch("/call")
           .then(function(response){
-            response.json()
-              .then(function(tracks){
-                console.log(tracks);
-              })
+            response.json().then(function(data){
+              console.log(data);
+            })
           })
 
         var ajaxCall = function(url,s){
@@ -89,7 +90,7 @@
           return apiObject;
         }
           
-        var pl = function(obj) {    
+        var pl = function(obj) { 
           var items = obj.playlists.items;
           var itemslength = Object.keys(items).length;
           var mapArtist = function(tracks,index){
@@ -126,6 +127,7 @@
           var t = items.forEach(function(items,index){            
             var trackURL = ajaxCall(items.tracks.href)
                               .success(function(data){//playlist image and track list don't match
+                                console.log("this is called");
                                       mappedPlaylistImage.push(items.images[0].url);
                                       mappedArtist.push(data.items.map(mapArtist,this));
                                       mappedTrack.push(data.items.map(mapTrack,this));

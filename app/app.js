@@ -13,6 +13,8 @@ var requestpromise = require('request-promise');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 var spotify = require('./public/lib/spotify.js');
+var storage = require('node-persist');
+
 
 
 var client_id = 'fb255c97e8894be4ad4a234e3a7ac7ec'; // Your client id
@@ -38,33 +40,14 @@ var stateKey = 'spotify_auth_state';
 
 var app = express();
 
-//Webpack Server Stuffs
-// var webpackDevMiddleware = require("webpack-dev-middleware");
-// var webpackHotMiddleware = require("webpack-hot-middleware");
-// var webpack = require("webpack");
-// var config = require("../webpack.config");
-// var compiler = webpack(config);
+storage.initSync();
 
-// app.use(webpackDevMiddleware(compiler, {
-//   hot: true,
-//   filename: 'bundle.js',
-//   publicPath: '/assets/',
-//   stats: {
-//     colors: true,
-//   },
-//   historyApiFallback: true,
-// }));
- 
-// app.use(webpackHotMiddleware(compiler, {
-//   log: console.log,
-//   path: '/__webpack_hmr',
-//   heartbeat: 10 * 1000,
-// }));
 
 //Real app stuff
 
 app.use(express.static(__dirname + '/public'))
    .use(cookieParser());
+
 
 app.get('/login', function(req, res) {
 
@@ -118,6 +101,10 @@ app.get('/callback', function(req, res) {
 
         var access_token = body.access_token,
             refresh_token = body.refresh_token;
+
+        app.locals.accesstoken = access_token; // Access Token for the whole app
+
+        
         var options = {
           url: 'https://api.spotify.com/v1/me',
           headers: { 'Authorization': 'Bearer ' + access_token },
@@ -126,7 +113,7 @@ app.get('/callback', function(req, res) {
 
         // use the access token to access the Spotify Web API
         request.get(options, function(error, response, body) {
-          console.log(body);
+          // console.log(body);
         });
 
         // we can also pass the token to the browser to make requests from there
@@ -170,15 +157,21 @@ app.get('/refresh_token', function(req, res) {
 });
 
 app.get('/search',function(req,res){
+  
     var query = req.param('query');
-    
-    requestpromise({url:'https://api.spotify.com/v1/search?q= '+ query + ' +&type=playlist',
-        json:true})
+    var option = {
+      url:'https://api.spotify.com/v1/search?q= '+ query + ' +&type=playlist',
+      headers: {
+            'Authorization': 'Bearer ' + app.locals.accesstoken
+      }
+    };
+
+    requestpromise(option)
       .then(function(data){
         res.send(data)
       })
       .catch(function(err){
-        console.log(err);
+        //  console.log(err);
       })
   })
 
@@ -186,17 +179,17 @@ app.get('/play',function(req,res){
   var id = req.param('id');
   spotify.getTokens().then(() => {
     return spotify.play(id);
-  }).then(console.log, console.error)
+  })//.then(console.log, console.error)
 });
 
 app.get('/call', function(req,res){
-  var token = req.param('token');
   var option = {
     url:'https://api.spotify.com/v1/browse/categories/chill/playlists/',
     headers:{
-          'Authorization': 'Bearer ' + token
+          'Authorization': 'Bearer ' + app.locals.accesstoken
         }
   };
+  /*Call is working but need to implement this all over the app and take this function out of index.html*/
 
   requestpromise(option)
     .then(function(data){
@@ -212,7 +205,7 @@ app.get('/call', function(req,res){
       getPlaylistData(playlisthref,playlistimageurl);
     })
     .catch(function(err){
-      console.log(err);
+      // console.log(err);
     });
 
   function getPlaylistData(href,imgurl){
@@ -221,7 +214,7 @@ app.get('/call', function(req,res){
       var option = {
         url:href,
         headers:{
-          'Authorization': 'Bearer ' + token
+          'Authorization': 'Bearer ' + app.locals.accesstoken
         }
       };
       
@@ -229,14 +222,33 @@ app.get('/call', function(req,res){
       .then(function(playlistdata){
         playlistdata = JSON.parse(playlistdata);
         var playlisttracksobject = playlistdata.tracks;
-        console.log("sending to browser");
+        var itemsLength = Object.keys(playlisttracksobject.items).length;
         res.send(playlisttracksobject);
+        playlisttracksobject.items.forEach(function(items,index){
+          console.log(items.track.href);
+          var optionTrack = {
+            url: items.track.href,
+            headers:{
+              'Authorization': 'Bearer ' + app.locals.accesstoken
+            }
+          }
+          requestpromise(optionTrack)
+            .then(function(data){
+              console.log(data);
+            })
+            .catch(function(err){
+              console.log(err);
+            })
+        })
       })
       .catch(function(err){
-        console.log(err);
+        // console.log(err);
       })
     })
   }
 })
-console.log('Listening');
+
+
+
+console.log('Listening in port 8888');
 app.listen(process.env.PORT||8888);
